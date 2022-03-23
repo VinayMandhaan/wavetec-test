@@ -4,16 +4,16 @@ const {check, validationResult} = require('express-validator')
 const bcrypt = require('bcryptjs')
 const config = require('config')
 const mongoose = require('mongoose')
-const Task = require('../../models/Task')
-const User = require('../../models/User')
+const Task = require('../models/Task')
+const User = require('../models/User')
 var ObjectId = require('mongodb').ObjectID;
-const auth = require('../../middleware/auth')
+const auth = require('../middleware/auth')
 
 
 //Create Task
 router.post("/",auth, async(req,res) => { 
     
-    const {task,status,date } = req.body
+    const {task,status,date,due_date, priority } = req.body
     try{
         // Check if the given userId is valid
         if(mongoose.Types.ObjectId.isValid(req.user.id)) {
@@ -27,7 +27,9 @@ router.post("/",auth, async(req,res) => {
                     task,
                     status,
                     date,
-                    user:req.user.id
+                    due_date,
+                    user:req.user.id,
+                    priority
                 })
                 await new_task.save();
                 res.json({new_task})
@@ -82,9 +84,10 @@ router.delete("/delete",auth, async(req,res) => {
 
 router.put("/update",auth, async(req,res) => { 
     
-    const {task_id, status} = req.body
+    const {task_id, status, taskName} = req.body
     const taskFields = {}
     if(status) taskFields.status = !status 
+    if(taskName) taskFields.name = taskName
     try{
         // Check if the given userId is valid
         if(mongoose.Types.ObjectId.isValid(req.user.id)) {
@@ -94,8 +97,17 @@ router.put("/update",auth, async(req,res) => {
             const subs = await User.findById(req.user.id) 
             // If Id is valid create installment
             var tasks = await Task.findById(new ObjectId(task_id))
+            console.log(tasks,'TASK')
+            if(tasks && taskName){
+                console.log(taskName,'HE')
+                tasks.task = taskName;
+                tasks.modified_date = Date.now()
+                await tasks.save()
+                res.json({tasks})
+            }
             if(tasks){
-                    tasks.status = !tasks.status
+                    tasks.status = !tasks.status,
+                    tasks.modified_date = Date.now()
                     // tasks = await Task.findOneAndUpdate({_id:{$eq:task_id}},{ $set: {status:!status}},{new:true})
                     await tasks.save()
                     res.json({tasks})

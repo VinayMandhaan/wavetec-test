@@ -17,9 +17,8 @@ app.get('/',(req,res)=>{
     res.send('API Running')
 })
 
-app.use('/api/auth',require('./controller/api/auth'))
-app.use('/api/user',require('./controller/api/user'))
-app.use('/api/tasks',require('./controller/api/tasks'))
+app.use('/api/auth',require('./api/auth'))
+app.use('/api/tasks',require('./api/tasks'))
 
 app.listen(PORT, ()=>{
     console.log(`Server Started on Port ${PORT}`)
