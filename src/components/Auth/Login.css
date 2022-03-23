@@ -1,0 +1,109 @@
+/*Login css*/
+
+
+.login-container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    background-color: #101010;
+    /* background: url(../../../assets/images/login-bg.png) no-repeat; */
+    background-size: cover;
+    background-position: center center;
+  }
+  
+  .deform {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    box-sizing: border-box;
+    padding: 55px 50px;
+    border-radius: 15px;
+    width: 500px;
+  }
+  
+  .deform div.form-field label {
+    /* color: #63636d; */
+    font-size: 14px;
+    font-weight: 500;
+    width: 100%;
+  }
+  
+  .deform div.form-field input {
+    /* color: #202224; */
+    padding: 12px 15px;
+    margin: 10px 0;
+    border: 1px solid #eeeeee;
+    box-sizing: border-box;
+    border-radius: 8px;
+    width: 100%;
+    background:#f7f8fa;
+    font-size: 14px;
+  }
+  .deform div.form-field{
+      margin-top: 10px;
+  }
+  .deform div.form-field input::placeholder {
+    color: #202224;
+    font-size: 14px;
+  }
+  
+  .form-field.btn-login .submitBtn {
+    background: #ff1616;
+    color: #fff;
+    /* font-weight: 600; */
+    font-size: 16px;
+    border: 0;
+    outline: 0;
+    transition: all 0.5s ease;
+    cursor: pointer;
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin:40px auto 0px;
+    text-transform: initial;
+    font-weight: bold;
+  }
+  /* .form-field.btn-login input[type="submit"]:hover{
+    transition: all 0.5s ease;
+    background:#000;
+  } */
+  .hedin {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .hedin h1, .hedin p {
+    margin: 0;
+    /* font-family: MontserratMedium; */
+  }
+  
+  .hedin h1 {
+    color: #202224;
+    font-size: 26px;
+    margin: 0;
+  }
+  
+  .hedin p {
+    margin: 5px 0 20px;
+    font-size: 14px;
+    color: #a7a6a6;
+  }
+  
+  .form-field.btn-login {
+    padding: 0 20px;
+    box-sizing: border-box;
+  }
+  /*Login css*/
+
+@media all and (max-width: 767px) and (min-width: 320px){
+    .deform {
+        padding: 20px;
+    }
+    .form-field.btn-login .submitBtn {
+        margin: 0px;
+    }
+}
