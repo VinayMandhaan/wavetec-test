@@ -1,7 +1,13 @@
 import { useState } from 'react';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 
-const Home = () => {
-  
+const Home = () => {  
   const [data, setData] = useState
   ([
     {
@@ -77,9 +83,9 @@ const Home = () => {
     setFilteredList(tempData)
   }
   return (
-    <div>
+    <div style={{margin:40}}>
       <input type='text' onChange={(e)=>searchTask(e)}/>
-      {
+      {/* {
         filteredList.map((val, i) => (
           <div style={{display:'flex', flexDirection:'row', alignItems:'center'}}>
             <p>{val.id}</p>
@@ -90,7 +96,37 @@ const Home = () => {
             <p>Bottom</p>
           </div>
         ))
-      }
+      } */}
+      <TableContainer component={Paper}>
+      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+        <TableHead>
+          <TableRow>
+            <TableCell>Title</TableCell>
+            <TableCell align="right">Status</TableCell>
+            <TableCell align="right">Priority</TableCell>
+            <TableCell align="right">Created Date</TableCell>
+            <TableCell align="right">Modified Date</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {filteredList.map((val) => (
+            <TableRow
+              key={val.id}
+              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+            >
+              <TableCell component="th" scope="row">
+                {val.title}
+              </TableCell>
+              <TableCell align="right">
+              <input type={"checkbox"} checked={val.status} onChange={()=>onChangeValue(val.id)} />
+              </TableCell>
+
+              <TableCell align="right">{checkPriority(val.priority)}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
     </div>
   )
 }

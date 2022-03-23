@@ -1,0 +1,4 @@
+{
+    "mongoURI": "mongodb+srv://vinay:vinay.123@todoapp.ogfo1.mongodb.net/TodoApp?retryWrites=true&w=majority",
+    "jwtSecret" : "mysecrettoken"
+}
