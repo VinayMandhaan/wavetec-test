@@ -34,7 +34,6 @@ export const updateTask = async(id,name) => {
             }
         }).then((res) => {
             console.log(res)
-            getTasks()
             return res.data
         })
         return response
@@ -42,3 +41,49 @@ export const updateTask = async(id,name) => {
         console.log(err)
     }
 }
+
+
+export const addTask = async(title,priority,date) => {
+    try{
+        const response = await axios({
+            method:'POST',
+            url:`${baseUrl}/tasks`,
+            headers: {
+                "x-auth-token":userToken
+            },
+            data: {
+                task: title,
+                priority:priority,
+                due_date:date
+            }
+        }).then((res) => {
+            console.log(res)
+            return res.data
+        })
+        return response
+    }catch(err){
+        console.log(err)
+    }
+}
+
+export const deleteTask = async(id) => {
+    try{
+        const response = await axios({
+            method:'DELETE',
+            url:`${baseUrl}/tasks/delete`,
+            headers: {
+                "x-auth-token":userToken
+            },
+            data: {
+                task_id: id
+            }
+        }).then((res) => {
+            console.log(res)
+            return res.data
+        })
+        return response
+    }catch(err){
+        console.log(err)
+    }
+}
+

@@ -25,7 +25,7 @@ router.post("/",auth, async(req,res) => {
             if(subs){
                 new_task = new Task({
                     task,
-                    status,
+                    status:false,
                     date,
                     due_date,
                     user:req.user.id,

@@ -6,17 +6,36 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { getTasks, updateTask } from '../../utils/api';
+import { addTask, deleteTask, getTasks, updateTask } from '../../utils/api';
 import moment from 'moment'
 import { UpOutlined, DownOutlined, DeleteOutlined } from '@ant-design/icons';
 import { EditText, EditTextarea } from 'react-edit-text';
 import 'react-edit-text/dist/index.css';
+import { Modal, Button, Input, DatePicker } from 'antd';
 
 const Home = () => {
   const [data, setData] = useState()
   const [filteredList, setFilteredList] = useState()
   const [taskName, setTaskName] = useState()
   const [searchItem, setSearchItem] = useState()
+  const [viewOverDue, setViewOverDue] = useState()
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [taskTitle, setTaskTitle] = useState('')
+  const [taskPriority, setTaskPriority] = useState('')
+  const [dueDate, setDueDate] = useState()
+
+
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleOk = () => {
+    addUserTask()
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+  };
 
   const checkPriority = (val) => {
     var priorityText
@@ -47,9 +66,14 @@ const Home = () => {
     localStorage.setItem('search', value)
   }
 
-  const searchUserTask = () => {
-    const filteredTasks = data.filter(val => val.task.toLowerCase().includes(searchItem.toLowerCase()))
-    setFilteredList(filteredTasks)
+  const getOverDue = () => {
+    setViewOverDue(true)
+    const newData = [...filteredList]
+    var currentDate = new Date().getTime()
+    console.log(currentDate)
+    var newArr = newData.filter(val => new Date(val.due_date).getTime() < currentDate)
+    console.log(newArr)
+    setFilteredList(newArr)
   }
 
   const swapElements = (a, b) => {
@@ -83,6 +107,7 @@ const Home = () => {
   const updateTaskData = async (id) => {
     const res = await updateTask(id)
     console.log(res, 'UPDATE')
+    getTaskData()
   }
 
   const sortData = async (type) => {
@@ -103,7 +128,8 @@ const Home = () => {
           return d - c
         });
       case 'Priority':
-        newData.sort(function(a,b){return a.priority - b.priority})
+        console.log('HEHAA')
+        newData.sort((a, b) => a.priority - b.priority)
       case 'Created':
         newData.sort(function (a, b) {
           var c = new Date(a.date).getSeconds();
@@ -115,17 +141,50 @@ const Home = () => {
     setFilteredList(newData)
   }
 
+  const onDateChange = (date) => {
+    console.log(date.toString())
+    setDueDate(date.toString())
+  }
+  
+  const addUserTask = async() => {
+    setIsModalVisible(false);
+    const res = await addTask(taskName,taskPriority,dueDate)
+    if(res.new_task){
+      getTaskData()
+    }
+  }
+  
+  const moveDown = () => {
+
+  }
+
   useEffect(() => {
     getTaskData()
   }, [])
 
-  useEffect(() => {
-
-  },[])
   return (
     <div style={{ margin: 40 }}>
+      <Modal title="Basic Modal" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
+        <div style={{margin:10}}>
+          <Input placeholder="Enter Title" onChange={(e)=>setTaskName(e.target.value)}/>
+        </div>
+        <div style={{margin:10}}>
+          <DatePicker onChange={onDateChange} />
+        </div>
+        <div style={{margin:10}}>
+          <select onChange={(e)=>setTaskPriority(e.target.value)}>
+            <option value={1}>High</option>
+            <option value={2}>Medium</option>
+            <option value={3}>Low</option>
+          </select>
+        </div>
+
+      </Modal>
       <div style={{display:'flex', alignItems:'center', justifyContent:'center', width:'100%', margin:20}}>
         <input style={{width:'20%', padding:10, borderRadius:15}} value={searchItem} type='text' placeholder='Search' onChange={(e) => {searchTask(e); setSearchItem(e.target.value)}} />
+        <button style={{backgroundColor:'black', padding:10, color:'white', fontWeight:'bold', marginLeft:20, border:'none'}} onClick={()=>{showModal()}}>Add</button>
+        { viewOverDue ? <button style={{backgroundColor:'black', padding:10, color:'white', fontWeight:'bold', marginLeft:20, border:'none'}} onClick={()=>{getTaskData(); setViewOverDue(false)}}>All Task</button> : <button style={{backgroundColor:'black', padding:10, color:'white', fontWeight:'bold', marginLeft:20, border:'none'}} onClick={()=>getOverDue()}>Overdue</button> 
+        }
       </div>
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -133,7 +192,11 @@ const Home = () => {
             <TableRow>
               <TableCell onClick={() => sortData('Task')}>Title</TableCell>
               <TableCell align="right">Status</TableCell>
-              <TableCell align="right">Priority</TableCell>
+              <TableCell onClick={()=>{
+                var newData = [...filteredList]
+                newData.sort((a, b) => a.priority - b.priority)
+                setFilteredList(newData)
+              }} align="right">Priority</TableCell>
               <TableCell align="right">Created Date</TableCell>
               <TableCell onClick={() => sortData('Modified')} align="right">Modified Date</TableCell>
               <TableCell align="right">Reorder</TableCell>
@@ -159,10 +222,10 @@ const Home = () => {
                 <TableCell align="right">{val.modified_date ? moment(val.modified_date).format('LLL') : '-'}</TableCell>
                 <TableCell align="right">
                   <UpOutlined onClick={() => i - 1 >= 0 && swapElements(i, i - 1)} style={{ marginRight: 20 }} />
-                  <DownOutlined onClick={() => { !i + 1 >= filteredList.length && swapElements(i, i + 1); console.log(data.length) }} />
+                  <DownOutlined onClick={() => { i + 1 >= filteredList.length ? moveDown() : swapElements(i, i + 1); console.log(i+1) }} />
                 </TableCell>
                 <TableCell align="right">
-                  <DeleteOutlined style={{ color: 'red' }} />
+                  <DeleteOutlined onClick={()=>{deleteTask(val._id);getTaskData()}} style={{ color: 'red' }} />
                 </TableCell>
                 <TableCell align="right">{val.due_date ? moment(val.due_date).format('LLL') : '-'}</TableCell>
 
