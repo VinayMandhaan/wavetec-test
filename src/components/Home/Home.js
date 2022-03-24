@@ -13,6 +13,7 @@ import { EditText, EditTextarea } from 'react-edit-text';
 import 'react-edit-text/dist/index.css';
 import { Modal, Button, Input, DatePicker } from 'antd';
 import { useHistory } from 'react-router-dom'
+import TaskData from '../TaskData/TaskData';
 
 
 const Home = () => {
@@ -24,7 +25,7 @@ const Home = () => {
   const [viewOverDue, setViewOverDue] = useState()
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [taskTitle, setTaskTitle] = useState('')
-  const [taskPriority, setTaskPriority] = useState('')
+  const [taskPriority, setTaskPriority] = useState('1')
   const [dueDate, setDueDate] = useState()
 
 
@@ -46,7 +47,7 @@ const Home = () => {
       return priorityText = 'High'
     } else if (val === 2) {
       return priorityText = 'Medium'
-    } else if (val === 1) {
+    } else if (val === 3) {
       return priorityText = 'Low'
     } else {
       return priorityText = 'Null'
@@ -119,28 +120,23 @@ const Home = () => {
     const newData = [...filteredList]
     switch (type) {
       case 'Modified':
-        newData.sort(function (a, b) {
-          var c = new Date(a.modified_date).getMinutes();
-          var d = new Date(b.modified_date).getMinutes();
-          return d - c;
-        });
+        newData.sort((b,a) => new Date(a.modified_date) - new Date(b.modified_date))
+        break;
       case 'Task':
         newData.sort((a, b) => a.task.localeCompare(b.task))
+        break;
       case 'Due':
-        newData.sort(function (a, b) {
-          var c = new Date(a.due_date).getSeconds();
-          var d = new Date(b.due_date).getSeconds();
-          return d - c
-        });
+        newData.sort((b,a) => new Date(b.due_date) - new Date(a.due_date))
+        console.log(newData)
+        break;
       case 'Priority':
-        console.log('HEHAA')
         newData.sort((a, b) => a.priority - b.priority)
+        break;
       case 'Created':
-        newData.sort(function (a, b) {
-          var c = new Date(a.date).getSeconds();
-          var d = new Date(b.date).getSeconds();
-          return d - c
-        });
+        newData.sort((b,a) => new Date(a.date) - new Date(b.date))
+        break;
+      default:
+        return;
     }
     console.log(newData, 'TEST')
     setFilteredList(newData)
@@ -192,19 +188,17 @@ const Home = () => {
           <DatePicker onChange={onDateChange} />
         </div>
         <div style={{ margin: 10 }}>
-          <select onChange={(e) => setTaskPriority(e.target.value)}>
+          <select  onChange={(e) => setTaskPriority(e.target.value)}>
             <option value={1}>High</option>
             <option value={2}>Medium</option>
             <option value={3}>Low</option>
           </select>
         </div>
-
       </Modal>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', margin: 20 }}>
         <input style={{ width: '20%', padding: 10, borderRadius: 15 }} value={searchItem} type='text' placeholder='Search' onChange={(e) => { searchTask(e); setSearchItem(e.target.value) }} />
         <button style={{ backgroundColor: 'black', padding: 10, color: 'white', fontWeight: 'bold', marginLeft: 20, border: 'none' }} onClick={() => { showModal() }}>Add</button>
         <button style={{ backgroundColor: 'black', padding: 10, color: 'white', fontWeight: 'bold', marginLeft: 20, border: 'none' }} onClick={() => { logout() }}>Logout</button>
-
         {viewOverDue ? <button style={{ backgroundColor: 'black', padding: 10, color: 'white', fontWeight: 'bold', marginLeft: 20, border: 'none' }} onClick={() => { getTaskData(); setViewOverDue(false) }}>All Task</button> : <button style={{ backgroundColor: 'black', padding: 10, color: 'white', fontWeight: 'bold', marginLeft: 20, border: 'none' }} onClick={() => getOverDue()}>Overdue</button>
         }
       </div>
@@ -214,54 +208,16 @@ const Home = () => {
             <TableRow>
               <TableCell onClick={() => sortData('Task')}>Title</TableCell>
               <TableCell align="right">Status</TableCell>
-              <TableCell onClick={() => {
-                var newData = [...filteredList]
-                newData.sort((a, b) => a.priority - b.priority)
-                console.log(newData)
-                setFilteredList(newData)
-              }} align="right">Priority <DownOutlined /></TableCell>
+              <TableCell onClick={()=> sortData('Priority')} align="right">Priority <DownOutlined /></TableCell>
               <TableCell onClick={() => sortData('Created')} align="right">Created Date <DownOutlined /></TableCell>
-              <TableCell onClick={() => {
-                var newData = [...filteredList]
-                newData.sort((b,a) => new Date(a.modified_date) - new Date(b.modified_date))
-                setFilteredList(newData)
-              }}  align="right">Modified Date<DownOutlined /></TableCell>
+              <TableCell onClick={()=> sortData('Modified')} align="right">Modified Date<DownOutlined /></TableCell>
               <TableCell align="right">Reorder</TableCell>
               <TableCell align="right">Actions</TableCell>
-              <TableCell onClick={() => {
-                var newData = [...filteredList]
-                newData.sort((b,a) => new Date(b.due_date) - new Date(a.due_date))
-                setFilteredList(newData)
-              }} align="right">Due Date <DownOutlined /></TableCell>
-
+              <TableCell onClick={()=> sortData('Due')} align="right">Due Date <DownOutlined /></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredList && filteredList.map((val, i) => (
-              <TableRow
-                key={val.id}
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-              >
-                <TableCell component="th" scope="row">
-                  <EditText defaultValue={val.task} onChange={(e) => setTaskName(e.target.value)} onSave={(e) => updateTask(val._id, e.value)} />
-                </TableCell>
-                <TableCell align="right">
-                  <input type={"checkbox"} checked={val.status} onChange={() => onChangeValue(val._id)} />
-                </TableCell>
-                <TableCell align="right">{checkPriority(val.priority)}</TableCell>
-                <TableCell align="right">{moment(val.date).format('ll')}</TableCell>
-                <TableCell align="right">{val.modified_date ? moment(val.modified_date).format('LLL') : '-'}</TableCell>
-                <TableCell align="right">
-                  <UpOutlined onClick={() => i - 1 >= 0 && swapElements(i, i - 1)} style={{ marginRight: 20 }} />
-                  <DownOutlined onClick={() => { i + 1 >= filteredList.length ? moveDown() : swapElements(i, i + 1); console.log(i + 1) }} />
-                </TableCell>
-                <TableCell align="right">
-                  <DeleteOutlined onClick={() => { deleteTask(val._id); getTaskData() }} style={{ color: 'red' }} />
-                </TableCell>
-                <TableCell align="right">{val.due_date ? moment(val.due_date).format('LLL') : '-'}</TableCell>
-
-              </TableRow>
-            ))}
+            <TaskData filteredList={filteredList} setTaskName={() => setTaskName()} onChangeValue={onChangeValue} checkPriority={checkPriority} swapElements={swapElements} moveDown={moveDown} getTaskData={getTaskData}/>
           </TableBody>
         </Table>
       </TableContainer>
