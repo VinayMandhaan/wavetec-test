@@ -12,8 +12,11 @@ import { UpOutlined, DownOutlined, DeleteOutlined } from '@ant-design/icons';
 import { EditText, EditTextarea } from 'react-edit-text';
 import 'react-edit-text/dist/index.css';
 import { Modal, Button, Input, DatePicker } from 'antd';
+import { useHistory } from 'react-router-dom'
+
 
 const Home = () => {
+  var history = useHistory()
   const [data, setData] = useState()
   const [filteredList, setFilteredList] = useState()
   const [taskName, setTaskName] = useState()
@@ -43,8 +46,10 @@ const Home = () => {
       return priorityText = 'High'
     } else if (val === 2) {
       return priorityText = 'Medium'
-    } else {
+    } else if(val === 1) {
       return priorityText = 'Low'
+    } else {
+      return priorityText = 'Null'
     }
   }
 
@@ -153,10 +158,25 @@ const Home = () => {
       getTaskData()
     }
   }
+
+  const logout = () => {
+    localStorage.removeItem('token')
+    history.push('/login')
+    
+  }
   
   const moveDown = () => {
 
   }
+
+  useEffect(() => {
+    var token = localStorage.getItem('token')
+    if(token === null){
+      history.push('/login')
+    } else {
+      history.push('/')
+    }
+  },[])
 
   useEffect(() => {
     getTaskData()
@@ -183,6 +203,8 @@ const Home = () => {
       <div style={{display:'flex', alignItems:'center', justifyContent:'center', width:'100%', margin:20}}>
         <input style={{width:'20%', padding:10, borderRadius:15}} value={searchItem} type='text' placeholder='Search' onChange={(e) => {searchTask(e); setSearchItem(e.target.value)}} />
         <button style={{backgroundColor:'black', padding:10, color:'white', fontWeight:'bold', marginLeft:20, border:'none'}} onClick={()=>{showModal()}}>Add</button>
+        <button style={{backgroundColor:'black', padding:10, color:'white', fontWeight:'bold', marginLeft:20, border:'none'}} onClick={()=>{logout()}}>Logout</button>
+        
         { viewOverDue ? <button style={{backgroundColor:'black', padding:10, color:'white', fontWeight:'bold', marginLeft:20, border:'none'}} onClick={()=>{getTaskData(); setViewOverDue(false)}}>All Task</button> : <button style={{backgroundColor:'black', padding:10, color:'white', fontWeight:'bold', marginLeft:20, border:'none'}} onClick={()=>getOverDue()}>Overdue</button> 
         }
       </div>
@@ -195,6 +217,7 @@ const Home = () => {
               <TableCell onClick={()=>{
                 var newData = [...filteredList]
                 newData.sort((a, b) => a.priority - b.priority)
+                console.log(newData)
                 setFilteredList(newData)
               }} align="right">Priority</TableCell>
               <TableCell align="right">Created Date</TableCell>
